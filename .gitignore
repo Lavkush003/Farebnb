@@ -47,7 +47,8 @@ out/
 turbo.json
 
 # Firebase
-./backend/serviceAccountKey.json
+serviceAccountKey.json
+backend/init/serviceAccountKey.json
 
 # Upload directories (if used for temporary files)
 upload/
