@@ -1,30 +1,61 @@
 
+// const mongoose = require("mongoose");
+// const initData = require("./data.js");
+
+// const Listing = require("../models/listing.js");
+
+
+// const MONGO_URL = "mongodb://127.0.0.1:27017/wanderlust";
+
+// main()
+//     .then(() => {
+//         console.log("connected to DB");
+
+//     })
+//     .catch((err) => {
+//         console.log(err);
+//     });
+
+// async function main() {
+//     await mongoose.connect(MONGO_URL);
+// }
+
+// const initDB = async () => {
+//     await Listing.deleteMany({});
+//     initData.data = initData.data.map((obj) => ({ ...obj, owner: '69901490e5b391a245580ae9', geometry: { type: 'Point', coordinates: [-118.2437, 34.0522] } }));
+//     await Listing.insertMany(initData.data);
+//     console.log("data was initialized");
+// };
+
+// initDB();
+
+
+
+
+
+require("dotenv").config();
 const mongoose = require("mongoose");
 const initData = require("./data.js");
-
 const Listing = require("../models/listing.js");
 
+const dbUrl = process.env.ATLASDB_URL;
 
-const MONGO_URL = "mongodb://127.0.0.1:27017/wanderlust";
-
-main()
-    .then(() => {
-        console.log("connected to DB");
-
-    })
-    .catch((err) => {
-        console.log(err);
-    });
-
-async function main() {
-    await mongoose.connect(MONGO_URL);
-}
+mongoose.connect(dbUrl)
+  .then(() => console.log("Connected to Atlas for seeding"))
+  .catch((err) => console.log(err));
 
 const initDB = async () => {
-    await Listing.deleteMany({});
-    initData.data = initData.data.map((obj) => ({ ...obj, owner: '69901490e5b391a245580ae9', geometry: { type: 'Point', coordinates: [-118.2437, 34.0522] } }));
-    await Listing.insertMany(initData.data);
-    console.log("data was initialized");
+  await Listing.deleteMany({});
+  initData.data = initData.data.map((obj) => ({
+    ...obj,
+    owner: "69901490e5b391a245580ae9",
+    geometry: {
+      type: "Point",
+      coordinates: [-118.2437, 34.0522],
+    },
+  }));
+  await Listing.insertMany(initData.data);
+  console.log("Data was initialized");
 };
 
-initDB();
+initDB().then(() => mongoose.connection.close());
