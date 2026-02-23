@@ -52,4 +52,5 @@ serviceAccountKey.json
 # Upload directories (if used for temporary files)
 upload/
 
-
+serviceAccountKey.json
+backend/init/serviceAccountKey.json
