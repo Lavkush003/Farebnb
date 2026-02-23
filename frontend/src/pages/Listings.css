@@ -1,0 +1,257 @@
+.wh-listings-page {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 1.5rem 3rem;
+}
+
+/* Loader */
+.wh-loader-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 50vh;
+    gap: 1rem;
+    color: #999;
+}
+
+.wh-loader {
+    width: 44px;
+    height: 44px;
+    border: 4px solid #f0f0f0;
+    border-top-color: #e63946;
+    border-radius: 50%;
+    animation: loaderSpin 0.8s linear infinite;
+}
+
+@keyframes loaderSpin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Filters Bar */
+.wh-filters-bar {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    padding: 1rem 0;
+    border-bottom: 1px solid #eee;
+    margin-bottom: 1.5rem;
+}
+
+.wh-filters-scroll {
+    display: flex;
+    gap: 0.5rem;
+    overflow-x: auto;
+    flex: 1;
+    padding-bottom: 0.25rem;
+    scrollbar-width: none;
+}
+
+.wh-filters-scroll::-webkit-scrollbar {
+    display: none;
+}
+
+.wh-filter-chip {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.3rem;
+    padding: 0.6rem 1rem;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    opacity: 0.6;
+    transition: all 0.25s ease;
+    border-bottom: 2px solid transparent;
+    flex-shrink: 0;
+}
+
+.wh-filter-chip:hover,
+.wh-filter-chip.active {
+    opacity: 1;
+    border-bottom-color: #333;
+}
+
+.wh-filter-icon {
+    font-size: 1.3rem;
+    color: #555;
+}
+
+.wh-filter-label {
+    font-size: 0.75rem;
+    color: #555;
+    white-space: nowrap;
+    font-weight: 500;
+}
+
+/* Tax Toggle */
+.wh-tax-toggle {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1rem;
+    border: 1px solid #ddd;
+    border-radius: 14px;
+    flex-shrink: 0;
+}
+
+.wh-tax-label {
+    font-size: 0.8rem;
+    font-weight: 500;
+    white-space: nowrap;
+    color: #555;
+}
+
+.wh-switch {
+    position: relative;
+    width: 40px;
+    height: 22px;
+    flex-shrink: 0;
+}
+
+.wh-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.wh-switch-slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: #ccc;
+    border-radius: 22px;
+    transition: 0.3s;
+}
+
+.wh-switch-slider::before {
+    content: "";
+    position: absolute;
+    height: 16px;
+    width: 16px;
+    left: 3px;
+    bottom: 3px;
+    background: #fff;
+    border-radius: 50%;
+    transition: 0.3s;
+}
+
+.wh-switch input:checked+.wh-switch-slider {
+    background: #e63946;
+}
+
+.wh-switch input:checked+.wh-switch-slider::before {
+    transform: translateX(18px);
+}
+
+/* Listings Grid */
+.wh-listings-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1.5rem;
+}
+
+.wh-listing-card {
+    text-decoration: none;
+    color: inherit;
+    border-radius: 16px;
+    overflow: hidden;
+    background: #fff;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+    transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    cursor: pointer;
+}
+
+.wh-listing-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.12);
+}
+
+.wh-card-img-wrapper {
+    position: relative;
+    overflow: hidden;
+    aspect-ratio: 4/3;
+}
+
+.wh-card-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.5s ease;
+}
+
+.wh-listing-card:hover .wh-card-img {
+    transform: scale(1.08);
+}
+
+.wh-card-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg,
+            transparent 50%,
+            rgba(0, 0, 0, 0.15) 100%);
+    pointer-events: none;
+}
+
+.wh-card-body {
+    padding: 1rem 1.25rem 1.25rem;
+}
+
+.wh-card-title {
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: #222;
+    margin-bottom: 0.3rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.wh-card-price {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: #444;
+    margin-bottom: 0.2rem;
+}
+
+.wh-tax-info {
+    font-size: 0.8rem;
+    color: #999;
+    font-weight: 400;
+    font-style: italic;
+}
+
+.wh-card-location {
+    font-size: 0.85rem;
+    color: #888;
+}
+
+/* Empty State */
+.wh-empty-state {
+    text-align: center;
+    padding: 4rem 1rem;
+    color: #999;
+}
+
+.wh-empty-state h3 {
+    font-size: 1.5rem;
+    color: #555;
+    margin-bottom: 0.5rem;
+}
+
+@media (max-width: 768px) {
+    .wh-filters-bar {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .wh-listings-grid {
+        grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+        gap: 1rem;
+    }
+}

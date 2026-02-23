@@ -1,0 +1,85 @@
+.wh-booking-widget {
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 16px;
+    padding: 1.5rem;
+    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.1);
+    position: sticky;
+    top: 100px;
+}
+
+.wh-booking-header h3 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #1a1a2e;
+    margin-bottom: 1rem;
+}
+
+.wh-booking-header h3 span {
+    font-size: 1rem;
+    font-weight: 400;
+    color: #777;
+}
+
+.wh-booking-calendar {
+    width: 100%;
+    margin-bottom: 1rem;
+    border: 1px solid #ddd;
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.rdrCalendarWrapper {
+    width: 100%;
+    font-family: inherit;
+    font-size: 14px;
+}
+
+.rdrMonth {
+    width: 100% !important;
+}
+
+.wh-booking-error {
+    color: #e63946;
+    font-size: 0.9rem;
+    margin-bottom: 1rem;
+    text-align: center;
+}
+
+.wh-reserve-btn {
+    padding: 0.8rem;
+    font-size: 1.05rem;
+    margin-bottom: 0.75rem;
+}
+
+.wh-booking-note {
+    text-align: center;
+    font-size: 0.85rem;
+    color: #777;
+    margin-bottom: 1.25rem;
+}
+
+.wh-booking-details {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.wh-booking-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.95rem;
+    color: #444;
+}
+
+.wh-booking-divider {
+    border: none;
+    border-top: 1px solid #eee;
+    margin: 0.5rem 0;
+}
+
+.wh-booking-total {
+    font-weight: 700;
+    color: #1a1a2e;
+    font-size: 1.1rem;
+}

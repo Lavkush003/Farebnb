@@ -36,7 +36,7 @@ logs/
 *.log
 
 # Dependencies
-package-lock.json
+
 yarn.lock
 
 # Misc
