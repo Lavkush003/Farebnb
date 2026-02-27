@@ -90,7 +90,8 @@ export default function ListingsPage() {
 
             {/* Listings Grid */}
             <div className="wh-listings-grid">
-                {displayedListings.map((listing) => (
+              {Array.isArray(displayedListings) &&
+  displayedListings.map((listing) => (
                     <Link
                         to={`/listings/${listing._id}`}
                         key={listing._id}
@@ -120,7 +121,7 @@ export default function ListingsPage() {
                 ))}
             </div>
 
-            {displayedListings.length === 0 && (
+            {Array.isArray(displayedListings) && displayedListings.length === 0 && (
                 <div className="wh-empty-state">
                     <h3>No listings found</h3>
                     <p>Be the first to list your property!</p>
