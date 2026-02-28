@@ -33,7 +33,7 @@ export default function ShowListingPage() {
         if (!listing || !listing.geometry || !listing.geometry.coordinates || !mapContainer.current) return;
         if (map.current) return; // initialize map only once
 
-        mapboxgl.accessToken = import.meta.env.VITE_MAP_TOKEN;
+        mapboxgl.accessToken = import.meta.env.VITE_MAPBOX_TOKEN;
 
         const [lng, lat] = listing.geometry.coordinates;
 
