@@ -1,13 +1,16 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import { API_BASE_URL } from "../api";
 import FlashMessage from "../components/FlashMessage";
 import { FcGoogle } from "react-icons/fc";
+import { FaBolt, FaHome, FaArrowLeft } from "react-icons/fa";
+import { TbHomeSpark } from "react-icons/tb";
 import "./FormPage.css";
 
 export default function LoginPage() {
     const navigate = useNavigate();
-    const { login } = useAuth();
+    const { login, demoLogin } = useAuth();
     const [flash, setFlash] = useState(null);
     const [submitting, setSubmitting] = useState(false);
 
@@ -28,7 +31,22 @@ export default function LoginPage() {
             navigate("/");
         } catch (err) {
             setFlash({
-                message: err.response?.data?.error || "Invalid credentials",
+                message: err.response?.data?.error || "Invalid username or password",
+                type: "error",
+            });
+        } finally {
+            setSubmitting(false);
+        }
+    };
+
+    const handleDemo = async (role) => {
+        setSubmitting(true);
+        try {
+            await demoLogin(role);
+            navigate(role === "host" ? "/host/listings" : "/");
+        } catch (err) {
+            setFlash({
+                message: err.response?.data?.error || "Demo login failed",
                 type: "error",
             });
         } finally {
@@ -37,11 +55,19 @@ export default function LoginPage() {
     };
 
     return (
-        <div className="wh-form-page">
-            <div className="wh-form-card">
-                <h2 className="wh-form-title">Welcome back!</h2>
-                <p className="wh-form-subtitle">
-                    Log in to your WanderHome account
+        <div className="wh-form-page-wrapper">
+            <div className="wh-auth-card">
+                <Link to="/" className="wh-form-back-btn">
+                    <FaArrowLeft /> Back to home
+                </Link>
+
+                <div className="wh-auth-brand-icon">
+                    <TbHomeSpark />
+                </div>
+
+                <h2 className="wh-auth-title">Welcome back to Farebnb</h2>
+                <p className="wh-auth-sub">
+                    Log in to access your bookings, wishlists, and host dashboard
                 </p>
 
                 {flash && (
@@ -52,8 +78,35 @@ export default function LoginPage() {
                     />
                 )}
 
-                <form onSubmit={handleSubmit} className="wh-form">
-                    <div className="wh-input-group">
+                {/* 1-Click Demo Login Shortcuts */}
+                <div className="wh-demo-quick-box">
+                    <span className="wh-demo-quick-title">⚡ 1-Click Instant Demo Testing:</span>
+                    <div className="wh-demo-btn-row">
+                        <button
+                            type="button"
+                            className="wh-demo-action-btn guest"
+                            onClick={() => handleDemo("guest")}
+                            disabled={submitting}
+                        >
+                            <FaBolt /> Login as Traveler
+                        </button>
+                        <button
+                            type="button"
+                            className="wh-demo-action-btn host"
+                            onClick={() => handleDemo("host")}
+                            disabled={submitting}
+                        >
+                            <FaHome /> Login as Superhost
+                        </button>
+                    </div>
+                </div>
+
+                <div className="wh-auth-divider">
+                    <span>or continue with credentials</span>
+                </div>
+
+                <form onSubmit={handleSubmit} className="wh-auth-form">
+                    <div className="wh-form-group">
                         <label htmlFor="username">Username</label>
                         <input
                             id="username"
@@ -66,7 +119,7 @@ export default function LoginPage() {
                         />
                     </div>
 
-                    <div className="wh-input-group">
+                    <div className="wh-form-group">
                         <label htmlFor="password">Password</label>
                         <input
                             id="password"
@@ -81,29 +134,28 @@ export default function LoginPage() {
 
                     <button
                         type="submit"
-                        className="wh-btn wh-btn-primary wh-btn-full"
+                        className="wh-btn wh-btn-primary wh-btn-full wh-auth-submit-btn"
                         disabled={submitting}
                     >
-                        {submitting ? "Logging in..." : "Log in"}
+                        {submitting ? "Signing in..." : "Log in"}
                     </button>
                 </form>
 
-                <div className="wh-divider">
-                    <span>OR</span>
+                <div className="wh-auth-divider">
+                    <span>or</span>
                 </div>
 
                 <button
                     type="button"
-                    className="wh-btn wh-btn-google wh-btn-full"
-                    onClick={() => window.location.href = "http://localhost:8080/api/users/google"}
+                    className="wh-btn wh-btn-outline wh-btn-full wh-google-auth-btn"
+                    onClick={() => (window.location.href = `${API_BASE_URL}/users/google`)}
                 >
                     <FcGoogle className="wh-google-icon" />
                     Continue with Google
                 </button>
 
-                <div className="wh-auth-footer">
-                    Don't have an account?{" "}
-                    <Link to="/signup">Sign up</Link>
+                <div className="wh-auth-footer-text">
+                    Don't have an account? <Link to="/signup">Sign up</Link>
                 </div>
             </div>
         </div>

@@ -1,86 +1,75 @@
-
-// // if (process.env.NODE_ENV !== "production") {
-// //   require("dotenv").config();
-// // }
-
-// // const mongoose = require("mongoose");
-// // const Listing = require("./models/listing");
-// // const data = require("../init/data");
-
-// // const dbUrl = process.env.ATLASDB_URL;
-
-// // mongoose.connect(dbUrl)
-// //   .then(() => console.log("Connected to DB"))
-// //   .catch(err => console.log(err));
-
-// // const initDB = async () => {
-// //   await Listing.deleteMany({});
-// //   await Listing.insertMany(data);
-// //   console.log("Database Seeded Successfully");
-// // };
-
-// // initDB().then(() => {
-// //   mongoose.connection.close();
-// // });
-
-
-
-
-
-// if (process.env.NODE_ENV !== "production") {
-//   require("dotenv").config();
-// }
-
-// const mongoose = require("mongoose");
-// const Listing = require("./models/listing");
-// const data = require("./init/data");
-
-// const dbUrl = process.env.ATLASDB_URL;
-
-// mongoose.connect(dbUrl)
-//   .then(() => console.log("Connected to DB"))
-//   .catch(err => console.log(err));
-
-// const initDB = async () => {
-//   await Listing.deleteMany({});
-//   await Listing.insertMany(data);
-//   console.log("Database Seeded Successfully");
-// };
-
-// initDB().then(() => {
-//   mongoose.connection.close();
-// });
-
-
-
 if (process.env.NODE_ENV !== "production") {
   require("dotenv").config({ path: require('path').join(__dirname, '.env') });
 }
 
 const mongoose = require("mongoose");
 const Listing = require("./models/listing");
-const { data } = require("./init/data");   // ✅ FIXED PATH
+const User = require("./models/user");
+const Review = require("./models/review");
+const { data } = require("./init/data");
 
-const dbUrl = process.env.ATLASDB_URL;
+const dbUrl = process.env.ATLASDB_URL || "mongodb://127.0.0.1:27017/farebnb";
 
 mongoose.connect(dbUrl)
-  .then(() => console.log("Connected to DB"))
-  .catch(err => console.log(err));
+  .then(() => console.log("Connected to DB for seeding"))
+  .catch(err => console.error("DB connection error during seed:", err));
 
 const initDB = async () => {
+  // Ensure a default host user exists
+  let hostUser = await User.findOne({ username: "wander_host" });
+  if (!hostUser) {
+    const newHost = new User({
+      username: "wander_host",
+      email: "host@farebnb.com",
+      isSuperhost: true,
+      bio: "Superhost with 6+ years hosting luxury vacation properties around the globe.",
+      avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&q=80",
+    });
+    hostUser = await User.register(newHost, "host1234");
+  }
+
+  // Ensure a reviewer user exists
+  let reviewerUser = await User.findOne({ username: "alex_traveler" });
+  if (!reviewerUser) {
+    const newReviewer = new User({
+      username: "alex_traveler",
+      email: "alex@farebnb.com",
+      avatar: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=300&q=80",
+      bio: "Avid hiker and digital nomad.",
+    });
+    reviewerUser = await User.register(newReviewer, "guest1234");
+  }
+
   await Listing.deleteMany({});
-  const enrichedData = data.map((obj) => ({
-    ...obj,
-    owner: "69901490e5b391a245580ae9",
-    geometry: {
-      type: "Point",
-      coordinates: [-118.2437, 34.0522],
-    },
-  }));
-  await Listing.insertMany(enrichedData);
-  console.log("Database Seeded Successfully");
+  await Review.deleteMany({});
+
+  for (const item of data) {
+    // Create sample reviews for each listing
+    const review1 = new Review({
+      comment: "Absolutely breathtaking stay! The photos don't even do it justice. Exceptionally clean and wonderful hosts.",
+      rating: 5,
+      author: reviewerUser._id,
+      createdAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000),
+    });
+    await review1.save();
+
+    const newListing = new Listing({
+      ...item,
+      owner: hostUser._id,
+      reviews: [review1._id],
+    });
+
+    await newListing.save();
+  }
+
+  console.log(`Database Seeded Successfully with ${data.length} rich listings!`);
 };
 
-initDB().then(() => {
-  mongoose.connection.close();
-});
+initDB()
+  .then(() => {
+    mongoose.connection.close();
+  })
+  .catch((err) => {
+    console.error("Seed error:", err);
+    mongoose.connection.close();
+  });

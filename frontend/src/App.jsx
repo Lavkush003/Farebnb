@@ -9,6 +9,10 @@ import EditListingPage from "./pages/EditListingPage";
 import LoginPage from "./pages/LoginPage";
 import SignupPage from "./pages/SignupPage";
 import MyBookingsPage from "./pages/MyBookingsPage";
+import WishlistPage from "./pages/WishlistPage";
+import HostDashboardPage from "./pages/HostDashboardPage";
+import MessagesPage from "./pages/MessagesPage";
+import AITripPlannerPage from "./pages/AITripPlannerPage";
 
 function App() {
   return (
@@ -24,6 +28,10 @@ function App() {
             <Route path="/login" element={<LoginPage />} />
             <Route path="/signup" element={<SignupPage />} />
             <Route path="/my-trips" element={<MyBookingsPage />} />
+            <Route path="/wishlists" element={<WishlistPage />} />
+            <Route path="/host/listings" element={<HostDashboardPage />} />
+            <Route path="/messages" element={<MessagesPage />} />
+            <Route path="/ai-planner" element={<AITripPlannerPage />} />
           </Routes>
         </main>
         <Footer />

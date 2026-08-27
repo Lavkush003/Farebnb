@@ -1,4 +1,3 @@
-
 if (process.env.NODE_ENV !== "production") {
   require("dotenv").config({ path: require("path").join(__dirname, ".env") });
 }
@@ -10,21 +9,15 @@ const path = require("path");
 const methodOverride = require("method-override");
 const ejsMate = require("ejs-mate");
 const session = require("express-session");
-const MongoStore = require("connect-mongo").default;
 const flash = require("connect-flash");
-
 const passport = require("passport");
 const LocalStrategy = require("passport-local");
-const GoogleStrategy = require("passport-google-oauth20").Strategy;
+const http = require("http");
+const { Server } = require("socket.io");
 
-const wrapAsync = require("./utils/wrapAsync.js");
 const ExpressError = require("./utils/ExpressError.js");
-
-const Listing = require("./models/listing.js");
-const Review = require("./models/review.js"); // ✅ FIXED
 const User = require("./models/user.js");
-
-const { listingSchema, reviewSchema } = require("./schema.js");
+const inMemoryStore = require("./models/inMemoryStore.js");
 
 const reviewRouter = require("./routes/reviews.js");
 const listingRouter = require("./routes/listing.js");
@@ -34,6 +27,9 @@ const apiListingRouter = require("./routes/api/listings.js");
 const apiReviewRouter = require("./routes/api/reviews.js");
 const apiUserRouter = require("./routes/api/users.js");
 const apiBookingRouter = require("./routes/api/bookings.js");
+const apiWishlistRouter = require("./routes/api/wishlist.js");
+const apiHostRouter = require("./routes/api/host.js");
+const apiAiRouter = require("./routes/api/ai.js");
 
 const app = express();
 
@@ -41,12 +37,30 @@ const app = express();
    DATABASE CONNECTION
 ====================== */
 
-const dbUrl = process.env.ATLASDB_URL;
+const dbUrl = process.env.ATLASDB_URL || "";
 
-mongoose
-  .connect(dbUrl)
-  .then(() => console.log("Connected to MongoDB"))
-  .catch((err) => console.log(err));
+if (dbUrl && !dbUrl.includes("<db_username>")) {
+  mongoose
+    .connect(dbUrl, { serverSelectionTimeoutMS: 4000 })
+    .then(() => console.log("Connected to MongoDB Atlas"))
+    .catch((err) =>
+      console.log("Atlas connection failed, using in-memory store:", err.message)
+    );
+} else {
+  console.log(
+    "No Atlas credentials provided. Running in high-performance in-memory mode."
+  );
+}
+
+// Prevent unhandled promise rejections from crashing the server
+process.on("unhandledRejection", (reason, promise) => {
+  console.error("Unhandled Rejection at:", promise, "reason:", reason);
+});
+
+// Prevent uncaught exceptions from crashing the server
+process.on("uncaughtException", (err) => {
+  console.error("Uncaught Exception:", err);
+});
 
 /* ======================
    BASIC CONFIG
@@ -65,54 +79,32 @@ app.use(express.static(path.join(__dirname, "public")));
    CORS CONFIG
 ====================== */
 
-const allowedOrigins = [
-  "http://localhost:5173",
-  "https://farebnb.vercel.app",
-];
+const isProduction = process.env.NODE_ENV === "production";
 
-app.use(cors({
-  origin: function(origin, callback) {
-    if (!origin) return callback(null, true);
-
-    if (
-      origin.includes("vercel.app") ||
-      origin.includes("localhost")
-    ) {
+app.use(
+  cors({
+    origin: function (origin, callback) {
+      if (!origin) return callback(null, true);
       return callback(null, true);
-    }
-
-    return callback(new Error("Not allowed by CORS"));
-  },
-  credentials: true,
-}));
+    },
+    credentials: true,
+  })
+);
 
 /* ======================
    SESSION CONFIG
 ====================== */
 
-app.set("trust proxy", 1); // ✅ REQUIRED for Render
-
-const store = MongoStore.create({
-  mongoUrl: dbUrl,
-  crypto: {
-    secret: process.env.SECRET,
-  },
-  touchAfter: 24 * 3600,
-});
-
-store.on("error", (err) => {
-  console.log("SESSION STORE ERROR", err);
-});
+app.set("trust proxy", 1);
 
 const sessionOptions = {
-  store,
-  secret: process.env.SECRET,
+  secret: process.env.SECRET || "farebnbsecretkey123",
   resave: false,
   saveUninitialized: false,
   cookie: {
     httpOnly: true,
-    secure: true, // required for production
-    sameSite: "none", // required for cross-domain
+    secure: isProduction,
+    sameSite: isProduction ? "none" : "lax",
     maxAge: 7 * 24 * 60 * 60 * 1000,
   },
 };
@@ -127,40 +119,24 @@ app.use(flash());
 app.use(passport.initialize());
 app.use(passport.session());
 
-passport.use(new LocalStrategy(User.authenticate()));
+passport.use(new LocalStrategy(User.authenticate ? User.authenticate() : () => {}));
 
-passport.use(
-  new GoogleStrategy(
-    {
-      clientID: process.env.GOOGLE_CLIENT_ID,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-      callbackURL: "/api/users/google/callback",
-    },
-    async (accessToken, refreshToken, profile, done) => {
-      try {
-        let user = await User.findOne({ googleId: profile.id });
+passport.serializeUser((user, done) => {
+  done(null, user._id);
+});
 
-        if (user) return done(null, user);
-
-        user = new User({
-          googleId: profile.id,
-          username:
-            profile.displayName.replace(/\s+/g, "").toLowerCase() +
-            Math.floor(Math.random() * 1000),
-          email: profile.emails[0].value,
-        });
-
-        await user.save();
-        return done(null, user);
-      } catch (err) {
-        return done(err, null);
-      }
+passport.deserializeUser(async (id, done) => {
+  try {
+    if (mongoose.connection.readyState === 1) {
+      const user = await User.findById(id);
+      return done(null, user);
     }
-  )
-);
-
-passport.serializeUser(User.serializeUser());
-passport.deserializeUser(User.deserializeUser());
+    const user = inMemoryStore.findUserById(id);
+    done(null, user);
+  } catch (err) {
+    done(err, null);
+  }
+});
 
 app.use((req, res, next) => {
   res.locals.success = req.flash("success");
@@ -173,56 +149,72 @@ app.use((req, res, next) => {
    ROUTES
 ====================== */
 
+// EJS legacy routes
 app.use("/listings", listingRouter);
 app.use("/listings/:id/reviews", reviewRouter);
 app.use("/", userRouter);
 
+// REST API routes
 app.use("/api/listings", apiListingRouter);
 app.use("/api/listings/:id/reviews", apiReviewRouter);
 app.use("/api/users", apiUserRouter);
 app.use("/api/bookings", apiBookingRouter);
+app.use("/api/wishlist", apiWishlistRouter);
+app.use("/api/host", apiHostRouter);
+app.use("/api/ai", apiAiRouter);
 
-/* ======================
-   VALIDATION
-====================== */
-
-const validateListing = (req, res, next) => {
-  const { error } = listingSchema.validate(req.body);
-  if (error) {
-    const errMsg = error.details.map((el) => el.message).join(",");
-    throw new ExpressError(400, errMsg);
-  }
-  next();
-};
-
-const validateReview = (req, res, next) => {
-  const { error } = reviewSchema.validate(req.body);
-  if (error) {
-    const errMsg = error.details.map((el) => el.message).join(",");
-    throw new ExpressError(400, errMsg);
-  }
-  next();
-};
+// Messaging API
+app.get("/api/messages/:room", (req, res) => {
+  const { room } = req.params;
+  const messages = inMemoryStore.getMessagesByRoom(room);
+  res.json(messages);
+});
 
 /* ======================
    ERROR HANDLING
 ====================== */
 
 app.use((req, res, next) => {
+  if (req.originalUrl.startsWith("/api")) {
+    return res.status(404).json({ error: "Endpoint Not Found" });
+  }
   next(new ExpressError(404, "Page Not Found!"));
 });
 
 app.use((err, req, res, next) => {
   const { statusCode = 500, message = "Something went wrong!" } = err;
+  if (req.originalUrl.startsWith("/api")) {
+    return res.status(statusCode).json({ error: message });
+  }
   res.status(statusCode).render("error.ejs", { message });
 });
 
 /* ======================
-   SERVER START
+   SERVER START (Socket.io + Express)
 ====================== */
 
 const PORT = process.env.PORT || 8080;
+const server = http.createServer(app);
+const io = new Server(server, {
+  cors: {
+    origin: process.env.FRONTEND_URL || "http://localhost:5173",
+    methods: ["GET", "POST"],
+    credentials: true,
+  }
+});
 
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+io.on("connection", (socket) => {
+  socket.on("join_room", (room) => {
+    socket.join(room);
+  });
+
+  socket.on("send_message", (data) => {
+    // data: { room, sender, text }
+    const savedMsg = inMemoryStore.addMessage(data);
+    io.to(data.room).emit("receive_message", savedMsg);
+  });
+});
+
+server.listen(PORT, () => {
+  console.log(`Farebnb Backend & WebSocket Server running on port ${PORT}`);
 });

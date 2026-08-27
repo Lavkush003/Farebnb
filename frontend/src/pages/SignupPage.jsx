@@ -1,8 +1,11 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import { API_BASE_URL } from "../api";
 import FlashMessage from "../components/FlashMessage";
 import { FcGoogle } from "react-icons/fc";
+import { FaArrowLeft } from "react-icons/fa";
+import { TbHomeSpark } from "react-icons/tb";
 import "./FormPage.css";
 
 export default function SignupPage() {
@@ -26,10 +29,10 @@ export default function SignupPage() {
         setSubmitting(true);
         try {
             await signup(form);
-            navigate("/login");
+            navigate("/");
         } catch (err) {
             setFlash({
-                message: err.response?.data?.error || "Signup failed",
+                message: err.response?.data?.error || "Signup failed. Please try a different username.",
                 type: "error",
             });
         } finally {
@@ -38,11 +41,19 @@ export default function SignupPage() {
     };
 
     return (
-        <div className="wh-form-page">
-            <div className="wh-form-card">
-                <h2 className="wh-form-title">Join WanderHome</h2>
-                <p className="wh-form-subtitle">
-                    Create an account and start exploring
+        <div className="wh-form-page-wrapper">
+            <div className="wh-auth-card">
+                <Link to="/" className="wh-form-back-btn">
+                    <FaArrowLeft /> Back to home
+                </Link>
+
+                <div className="wh-auth-brand-icon">
+                    <TbHomeSpark />
+                </div>
+
+                <h2 className="wh-auth-title">Join the Farebnb Community</h2>
+                <p className="wh-auth-sub">
+                    Create an account and discover extraordinary homes worldwide
                 </p>
 
                 {flash && (
@@ -53,21 +64,21 @@ export default function SignupPage() {
                     />
                 )}
 
-                <form onSubmit={handleSubmit} className="wh-form">
-                    <div className="wh-input-group">
+                <form onSubmit={handleSubmit} className="wh-auth-form">
+                    <div className="wh-form-group">
                         <label htmlFor="username">Username</label>
                         <input
                             id="username"
                             name="username"
                             type="text"
-                            placeholder="Choose a username"
+                            placeholder="e.g. johndoe"
                             value={form.username}
                             onChange={handleChange}
                             required
                         />
                     </div>
 
-                    <div className="wh-input-group">
+                    <div className="wh-form-group">
                         <label htmlFor="email">Email</label>
                         <input
                             id="email"
@@ -80,13 +91,13 @@ export default function SignupPage() {
                         />
                     </div>
 
-                    <div className="wh-input-group">
+                    <div className="wh-form-group">
                         <label htmlFor="password">Password</label>
                         <input
                             id="password"
                             name="password"
                             type="password"
-                            placeholder="Create a strong password"
+                            placeholder="At least 6 characters"
                             value={form.password}
                             onChange={handleChange}
                             required
@@ -95,29 +106,28 @@ export default function SignupPage() {
 
                     <button
                         type="submit"
-                        className="wh-btn wh-btn-primary wh-btn-full"
+                        className="wh-btn wh-btn-primary wh-btn-full wh-auth-submit-btn"
                         disabled={submitting}
                     >
-                        {submitting ? "Creating account..." : "Sign up"}
+                        {submitting ? "Creating your account..." : "Sign up"}
                     </button>
                 </form>
 
-                <div className="wh-divider">
-                    <span>OR</span>
+                <div className="wh-auth-divider">
+                    <span>or</span>
                 </div>
 
                 <button
                     type="button"
-                    className="wh-btn wh-btn-google wh-btn-full"
-                    onClick={() => window.location.href = "http://localhost:8080/api/users/google"}
+                    className="wh-btn wh-btn-outline wh-btn-full wh-google-auth-btn"
+                    onClick={() => (window.location.href = `${API_BASE_URL}/users/google`)}
                 >
                     <FcGoogle className="wh-google-icon" />
                     Continue with Google
                 </button>
 
-                <div className="wh-auth-footer">
-                    Already have an account?{" "}
-                    <Link to="/login">Log in</Link>
+                <div className="wh-auth-footer-text">
+                    Already have an account? <Link to="/login">Log in</Link>
                 </div>
             </div>
         </div>

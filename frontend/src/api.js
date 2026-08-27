@@ -1,14 +1,17 @@
-
-
 import axios from "axios";
 
+const configuredApiOrigin = import.meta.env.VITE_API_URL?.replace(/\/$/, "");
+export const API_ORIGIN = configuredApiOrigin ||
+    (import.meta.env.DEV ? "http://localhost:8080" : window.location.origin);
+export const API_BASE_URL = `${API_ORIGIN}/api`;
+
 const API = axios.create({
-    baseURL: `${import.meta.env.VITE_API_URL}/api`,
+    baseURL: API_BASE_URL,
     withCredentials: true,
 });
 
 // ===== LISTINGS =====
-export const getAllListings = () => API.get("/listings");
+export const getAllListings = (params) => API.get("/listings", { params });
 export const getListing = (id) => API.get(`/listings/${id}`);
 export const createListing = (formData) =>
     API.post("/listings", formData, {
@@ -19,6 +22,10 @@ export const updateListing = (id, formData) =>
         headers: { "Content-Type": "multipart/form-data" },
     });
 export const deleteListing = (id) => API.delete(`/listings/${id}`);
+export const getHostListings = () => API.get("/listings/host/my-listings");
+
+// ===== HOST =====
+export const getHostDashboard = () => API.get("/host/dashboard");
 
 // ===== REVIEWS =====
 export const createReview = (listingId, reviewData) =>
@@ -26,15 +33,27 @@ export const createReview = (listingId, reviewData) =>
 export const deleteReview = (listingId, reviewId) =>
     API.delete(`/listings/${listingId}/reviews/${reviewId}`);
 
-// ===== USERS =====
+// ===== USERS & AUTH =====
 export const getCurrentUser = () => API.get("/users/current");
 export const signup = (userData) => API.post("/users/signup", userData);
 export const login = (credentials) => API.post("/users/login", credentials);
+export const demoLogin = (role = "guest") => API.post("/users/demo-login", { role });
+export const updateProfile = (profileData) => API.put("/users/profile", profileData);
 export const logout = () => API.post("/users/logout");
 
 // ===== BOOKINGS =====
+export const getListingBookedDates = (listingId) => API.get(`/bookings/${listingId}/dates`);
 export const createBooking = (listingId, bookingData) =>
     API.post(`/bookings/${listingId}`, bookingData);
 export const getUserBookings = () => API.get("/bookings/user");
+export const getHostBookings = () => API.get("/bookings/host");
+export const cancelBooking = (id) => API.delete(`/bookings/${id}`);
+
+// ===== WISHLIST =====
+export const getWishlist = () => API.get("/wishlist");
+export const toggleWishlist = (listingId) => API.post(`/wishlist/${listingId}`);
+
+// ===== AI =====
+export const planTripAi = (prompt) => API.post("/ai/plan-trip", { prompt });
 
 export default API;

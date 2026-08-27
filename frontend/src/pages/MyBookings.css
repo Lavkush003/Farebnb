@@ -1,96 +1,230 @@
-.wh-bookings-page {
+.wh-bookings-page-container {
     max-width: 1200px;
     margin: 0 auto;
-    padding: 2rem;
+    padding: 2rem 2rem 5rem;
 }
 
-.wh-bookings-page h2 {
+.wh-bookings-header {
+    margin-bottom: 2.5rem;
+}
+
+.wh-bookings-header h1 {
     font-size: 2rem;
-    font-weight: 700;
-    margin-bottom: 2rem;
-    color: #1a1a2e;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+    color: var(--dark);
+    margin-bottom: 0.25rem;
 }
 
-.wh-bookings-grid {
+.wh-bookings-header p {
+    color: var(--gray-medium);
+    font-size: 1rem;
+}
+
+/* Empty State */
+.wh-bookings-empty-state {
+    text-align: center;
+    padding: 5rem 1rem;
+    max-width: 480px;
+    margin: 0 auto;
     display: flex;
     flex-direction: column;
-    gap: 1.5rem;
+    align-items: center;
+    gap: 1rem;
 }
 
-.wh-booking-card {
-    display: flex;
-    background: #fff;
-    border: 1px solid #eee;
-    border-radius: 16px;
+.wh-empty-luggage-icon {
+    font-size: 3.5rem;
+    color: var(--primary);
+    margin-bottom: 0.5rem;
+}
+
+.wh-bookings-empty-state h3 {
+    font-size: 1.45rem;
+    font-weight: 800;
+}
+
+.wh-bookings-empty-state p {
+    color: var(--gray-medium);
+    margin-bottom: 1rem;
+}
+
+/* Grid of Trips */
+.wh-trips-cards-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.75rem;
+}
+
+.wh-trip-card {
+    display: grid;
+    grid-template-columns: 320px 1fr;
+    border: 1px solid var(--gray-border);
+    border-radius: var(--radius-xl);
     overflow: hidden;
-    text-decoration: none;
-    color: inherit;
-    transition: all 0.3s ease;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    background: #ffffff;
+    box-shadow: var(--shadow-sm);
+    transition: box-shadow 0.25s ease, transform 0.2s ease;
 }
 
-.wh-booking-card:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+.wh-trip-card:hover {
+    box-shadow: var(--shadow-md);
+    transform: translateY(-2px);
 }
 
-.wh-booking-img {
-    width: 250px;
-    flex-shrink: 0;
+.wh-trip-img-box {
+    position: relative;
+    height: 100%;
+    min-height: 220px;
 }
 
-.wh-booking-img img {
+.wh-trip-img {
     width: 100%;
     height: 100%;
     object-fit: cover;
 }
 
-.wh-booking-details {
-    padding: 1.5rem;
+.wh-trip-status-tag {
+    position: absolute;
+    top: 1rem;
+    left: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.35rem 0.75rem;
+    border-radius: var(--radius-full);
+    font-size: 0.8rem;
+    font-weight: 700;
+    backdrop-filter: blur(8px);
+}
+
+.wh-trip-status-tag.confirmed {
+    background: rgba(232, 245, 233, 0.95);
+    color: #2e7d32;
+    border: 1px solid rgba(46, 125, 50, 0.2);
+}
+
+.wh-trip-status-tag.cancelled {
+    background: rgba(255, 235, 238, 0.95);
+    color: #c62828;
+    border: 1px solid rgba(198, 40, 40, 0.2);
+}
+
+.wh-trip-details-box {
+    padding: 1.75rem;
     display: flex;
     flex-direction: column;
-    justify-content: center;
+    justify-content: space-between;
+    gap: 1.25rem;
 }
 
-.wh-booking-details h3 {
-    font-size: 1.25rem;
+.wh-trip-loc {
+    font-size: 0.85rem;
+    color: var(--gray-medium);
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
     margin-bottom: 0.25rem;
-    color: #222;
 }
 
-.wh-booking-loc {
-    color: #777;
+.wh-trip-listing-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+}
+
+.wh-trip-listing-title a {
+    color: var(--dark);
+    transition: color 0.2s ease;
+}
+
+.wh-trip-listing-title a:hover {
+    color: var(--primary);
+}
+
+.wh-trip-meta-grid {
+    display: flex;
+    gap: 2.5rem;
+    flex-wrap: wrap;
+}
+
+.wh-trip-meta-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.wh-meta-icon {
+    font-size: 1.2rem;
+    color: var(--gray-medium);
+}
+
+.wh-trip-meta-item div {
+    display: flex;
+    flex-direction: column;
+}
+
+.wh-trip-meta-item label {
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: var(--gray-light);
+}
+
+.wh-trip-meta-item span {
     font-size: 0.95rem;
-    margin-bottom: 1rem;
-}
-
-.wh-booking-dates {
-    background: #f5f5f5;
-    padding: 0.75rem 1rem;
-    border-radius: 8px;
     font-weight: 600;
-    color: #333;
-    margin-bottom: 1rem;
-    display: inline-block;
+    color: var(--dark);
 }
 
-.wh-booking-price {
-    font-size: 1rem;
-    color: #555;
+.wh-trip-footer-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-top: 1rem;
+    border-top: 1px solid var(--gray-border);
+    flex-wrap: wrap;
+    gap: 1rem;
 }
 
-.wh-booking-price strong {
-    color: #1a1a2e;
+.wh-trip-price label {
+    display: block;
+    font-size: 0.75rem;
+    color: var(--gray-medium);
+}
+
+.wh-trip-price strong {
     font-size: 1.15rem;
+    font-weight: 800;
+    color: var(--dark);
+}
+
+.wh-trip-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.wh-btn-cancel-trip {
+    padding: 0.65rem 1.1rem;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #e63946;
+    border: 1px solid #ffcdd2;
+    border-radius: var(--radius-md);
+    background: #fff;
+    cursor: pointer;
+    transition: background 0.2s ease;
+}
+
+.wh-btn-cancel-trip:hover {
+    background: #ffebee;
 }
 
 @media (max-width: 768px) {
-    .wh-booking-card {
-        flex-direction: column;
+    .wh-trip-card {
+        grid-template-columns: 1fr;
     }
-
-    .wh-booking-img {
-        width: 100%;
+    .wh-trip-img-box {
         height: 200px;
     }
 }
