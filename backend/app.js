@@ -80,12 +80,22 @@ app.use(express.static(path.join(__dirname, "public")));
 ====================== */
 
 const isProduction = process.env.NODE_ENV === "production";
+const allowedFrontendOrigins = (
+  process.env.FRONTEND_URL ||
+  (isProduction ? "https://farebnb-three.vercel.app" : "http://localhost:5173")
+)
+  .split(",")
+  .map((origin) => origin.trim().replace(/\/$/, ""))
+  .filter(Boolean);
 
 app.use(
   cors({
     origin: function (origin, callback) {
       if (!origin) return callback(null, true);
-      return callback(null, true);
+      if (allowedFrontendOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+      return callback(new Error("Origin is not allowed by Farebnb CORS policy"));
     },
     credentials: true,
   })
@@ -197,7 +207,7 @@ const PORT = process.env.PORT || 8080;
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: process.env.FRONTEND_URL || "http://localhost:5173",
+    origin: allowedFrontendOrigins,
     methods: ["GET", "POST"],
     credentials: true,
   }
