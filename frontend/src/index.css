@@ -1,18 +1,18 @@
 @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400;1,600&display=swap');
 
 :root {
-  --primary: #ff385c;
-  --primary-gradient: linear-gradient(135deg, #e61e4d 0%, #e31c5f 50%, #d70466 100%);
-  --primary-hover: #d70466;
-  --primary-glow: rgba(230, 30, 77, 0.25);
+  --primary: #d85b3f;
+  --primary-gradient: linear-gradient(135deg, #d85b3f 0%, #c84f38 100%);
+  --primary-hover: #a84030;
+  --primary-glow: rgba(216, 91, 63, 0.24);
   
-  --dark: #222222;
-  --gray-dark: #484848;
-  --gray-medium: #717171;
+  --dark: #24332b;
+  --gray-dark: #4e5b53;
+  --gray-medium: #748078;
   --gray-light: #b0b0b0;
   --gray-border: #ebebeb;
-  --bg-light: #f7f7f7;
-  --bg-white: #ffffff;
+  --bg-light: #f1f0e9;
+  --bg-white: #fbfaf7;
   
   --radius-sm: 8px;
   --radius-md: 12px;

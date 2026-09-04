@@ -14,6 +14,19 @@ try {
   upload = multer({ dest: "uploads/" });
 }
 
+const removeDuplicateImages = (listings) => {
+  const seenImages = new Set();
+  return listings.filter((listing) => {
+    const imageUrl = listing.image?.url;
+    if (!imageUrl) return true;
+
+    const imageKey = imageUrl;
+    if (seenImages.has(imageKey)) return false;
+    seenImages.add(imageKey);
+    return true;
+  });
+};
+
 // Check logged in
 const isLoggedInApi = (req, res, next) => {
   if (!req.isAuthenticated || !req.isAuthenticated()) {
@@ -46,8 +59,12 @@ router.get(
       const { category, search, minPrice, maxPrice, sort, checkIn, checkOut, lat, lng } = req.query;
       let query = {};
 
-      if (category && category !== "All" && category !== "Trending") {
-        query.category = { $regex: new RegExp(`^${category}$`, "i") };
+      if (category && category !== "All") {
+        if (category === "Trending") {
+          query.isTrending = true;
+        } else {
+          query.category = { $regex: new RegExp(`^${category}$`, "i") };
+        }
       }
 
       if (search && search.trim() !== "") {
@@ -114,11 +131,11 @@ router.get(
       }
 
       const listings = await queryBuilder.exec();
-      return res.json(listings);
+      return res.json(removeDuplicateImages(listings));
     }
 
     const listings = inMemoryStore.findListings(req.query);
-    res.json(listings);
+    res.json(removeDuplicateImages(listings));
   })
 );
 

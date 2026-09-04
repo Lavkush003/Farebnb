@@ -3,6 +3,10 @@ import axios from "axios";
 const configuredApiOrigin = import.meta.env.VITE_API_URL?.replace(/\/$/, "");
 export const API_ORIGIN = configuredApiOrigin ||
     (import.meta.env.DEV ? "http://localhost:8080" : window.location.origin);
+
+if (!import.meta.env.DEV && !configuredApiOrigin) {
+    console.warn("VITE_API_URL is not configured; API requests will use the frontend origin.");
+}
 export const API_BASE_URL = `${API_ORIGIN}/api`;
 
 const API = axios.create({

@@ -7,12 +7,22 @@ const passport = require("passport");
 const wrapAsync = require("../../utils/wrapAsync.js");
 
 // GET /api/users/google
-router.get("/google", passport.authenticate("google", { scope: ["profile", "email"] }));
+router.get("/google", (req, res, next) => {
+    if (!process.env.GOOGLE_CLIENT_ID || !process.env.GOOGLE_CLIENT_SECRET) {
+        return res.status(503).json({ error: "Google login is not configured on the server" });
+    }
+    passport.authenticate("google", { scope: ["profile", "email"] })(req, res, next);
+});
 
 // GET /api/users/google/callback
 router.get(
     "/google/callback",
-    passport.authenticate("google", { failureRedirect: "/login?error=auth_failed" }),
+    (req, res, next) => {
+        if (!process.env.GOOGLE_CLIENT_ID || !process.env.GOOGLE_CLIENT_SECRET) {
+            return res.status(503).json({ error: "Google login is not configured on the server" });
+        }
+        passport.authenticate("google", { failureRedirect: "/login?error=auth_failed" })(req, res, next);
+    },
     (req, res) => {
         const frontendUrl = process.env.FRONTEND_URL || "/";
         res.redirect(frontendUrl);

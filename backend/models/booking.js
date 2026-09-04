@@ -29,6 +29,16 @@ const bookingSchema = new Schema({
         type: Number,
         required: true,
     },
+    paymentMethod: {
+        type: String,
+        enum: ["cash", "card", "online"],
+        required: true,
+    },
+    paymentStatus: {
+        type: String,
+        enum: ["pending", "paid"],
+        default: "pending",
+    },
     status: {
         type: String,
         enum: ["confirmed", "cancelled", "completed"],

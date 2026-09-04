@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
-import mapboxgl from "mapbox-gl";
-import "mapbox-gl/dist/mapbox-gl.css";
+import L from "leaflet";
+import "leaflet/dist/leaflet.css";
 import { getListing, deleteListing, createReview, deleteReview } from "../api";
 import { useAuth } from "../context/AuthContext";
 import FlashMessage from "../components/FlashMessage";
@@ -108,32 +108,17 @@ export default function ShowListingPage() {
             return;
         if (map.current) return;
 
-        const mapboxToken = import.meta.env.VITE_MAPBOX_TOKEN;
-        if (!mapboxToken) return;
-        mapboxgl.accessToken = mapboxToken;
-
         const [lng, lat] = listing.geometry.coordinates;
+        if (!Number.isFinite(lng) || !Number.isFinite(lat)) return;
 
-        map.current = new mapboxgl.Map({
-            container: mapContainer.current,
-            style: "mapbox://styles/mapbox/streets-v12",
-            center: [lng, lat],
-            zoom: 13,
-        });
-
-        map.current.addControl(new mapboxgl.NavigationControl(), "top-right");
-
-        const popup = new mapboxgl.Popup({ offset: 25 }).setHTML(`
-            <div style="padding: 6px;">
-                <h4 style="margin: 0 0 4px 0; font-size: 14px; font-weight: 700;">${listing.title}</h4>
-                <p style="margin: 0; color: #666; font-size: 12px;">${listing.location}, ${listing.country}</p>
-            </div>
-        `);
-
-        new mapboxgl.Marker({ color: "#ff385c" })
-            .setLngLat([lng, lat])
-            .setPopup(popup)
-            .addTo(map.current);
+        map.current = L.map(mapContainer.current).setView([lat, lng], 13);
+        L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+            attribution: "&copy; OpenStreetMap contributors",
+            maxZoom: 19,
+        }).addTo(map.current);
+        L.marker([lat, lng], {
+            icon: L.divIcon({ className: "wh-leaflet-detail-marker", html: "<span></span>", iconAnchor: [12, 24] }),
+        }).addTo(map.current).bindPopup(`<strong>${listing.title}</strong><br>${listing.location}, ${listing.country}`).openPopup();
     }, [listing]);
 
     const handleDeleteListing = async () => {

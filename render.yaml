@@ -1,0 +1,19 @@
+services:
+  - type: web
+    name: farebnb-api
+    runtime: node
+    rootDir: backend
+    buildCommand: npm install
+    startCommand: npm start
+    healthCheckPath: /api/listings
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: FRONTEND_URL
+        sync: false
+      - key: ATLASDB_URL
+        sync: false
+      - key: SECRET
+        generateValue: true
+      - key: JWT_SECRET
+        generateValue: true

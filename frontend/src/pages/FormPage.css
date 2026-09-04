@@ -238,6 +238,80 @@
     box-shadow: var(--shadow-md);
 }
 
+.wh-login-page {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(380px, 480px);
+    align-items: stretch;
+    max-width: 1060px;
+    min-height: 700px;
+    padding-top: 2rem;
+}
+
+.wh-login-visual {
+    position: relative;
+    min-height: 700px;
+    overflow: hidden;
+    border-radius: 8px 0 0 8px;
+    background: var(--dark);
+}
+
+.wh-login-visual::after {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(20, 35, 28, 0.05) 20%, rgba(20, 35, 28, 0.84) 100%);
+    content: "";
+}
+
+.wh-login-visual img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.wh-login-visual-overlay {
+    position: absolute;
+    right: 2rem;
+    bottom: 2rem;
+    left: 2rem;
+    z-index: 1;
+    color: #fff;
+}
+
+.wh-login-visual-kicker,
+.wh-login-visual-mark {
+    color: #e7eadb;
+    font-size: 0.7rem;
+    font-weight: 800;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+}
+
+.wh-login-visual h1 {
+    margin: 0.8rem 0;
+    font-size: clamp(2.1rem, 4vw, 3.5rem);
+    line-height: 0.98;
+    letter-spacing: -0.05em;
+}
+
+.wh-login-visual h1 em {
+    color: #f0a07f;
+    font-style: normal;
+}
+
+.wh-login-visual p {
+    max-width: 280px;
+    margin-bottom: 2rem;
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 0.9rem;
+}
+
+.wh-login-page .wh-auth-card {
+    max-width: none;
+    border-left: 0;
+    border-radius: 0 8px 8px 0;
+    box-shadow: 0 12px 36px rgba(36, 51, 43, 0.12);
+}
+
 .wh-auth-brand-icon {
     font-size: 2.5rem;
     color: var(--primary);
@@ -345,17 +419,35 @@
     padding: 0 0.75rem;
 }
 
-.wh-google-auth-btn {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.75rem;
-    font-size: 0.95rem;
-    padding: 0.8rem;
-}
+@media (max-width: 760px) {
+    .wh-login-page {
+        display: block;
+        min-height: 0;
+        padding-top: 1rem;
+    }
 
-.wh-google-icon {
-    font-size: 1.25rem;
+    .wh-login-visual {
+        min-height: 280px;
+        border-radius: 8px 8px 0 0;
+    }
+
+    .wh-login-visual-overlay {
+        right: 1.25rem;
+        bottom: 1.25rem;
+        left: 1.25rem;
+    }
+
+    .wh-login-visual h1 {
+        font-size: 2.2rem;
+    }
+
+    .wh-login-visual p { display: none; }
+
+    .wh-login-page .wh-auth-card {
+        border-top: 0;
+        border-left: 1px solid var(--gray-border);
+        border-radius: 0 0 8px 8px;
+    }
 }
 
 .wh-auth-footer-text {

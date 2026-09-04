@@ -12,6 +12,7 @@ const session = require("express-session");
 const flash = require("connect-flash");
 const passport = require("passport");
 const LocalStrategy = require("passport-local");
+const GoogleStrategy = require("passport-google-oauth20").Strategy;
 const http = require("http");
 const { Server } = require("socket.io");
 
@@ -41,7 +42,7 @@ const dbUrl = process.env.ATLASDB_URL || "";
 
 if (dbUrl && !dbUrl.includes("<db_username>")) {
   mongoose
-    .connect(dbUrl, { serverSelectionTimeoutMS: 4000 })
+    .connect(dbUrl, { serverSelectionTimeoutMS: 4000, family: 4 })
     .then(() => console.log("Connected to MongoDB Atlas"))
     .catch((err) =>
       console.log("Atlas connection failed, using in-memory store:", err.message)
@@ -130,6 +131,46 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 passport.use(new LocalStrategy(User.authenticate ? User.authenticate() : () => {}));
+
+const googleCallbackUrl = process.env.GOOGLE_CALLBACK_URL ||
+  `${process.env.BACKEND_URL || `http://localhost:${process.env.PORT || 8080}`}/api/users/google/callback`;
+
+if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
+  passport.use(new GoogleStrategy(
+    {
+      clientID: process.env.GOOGLE_CLIENT_ID,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+      callbackURL: googleCallbackUrl,
+    },
+    async (accessToken, refreshToken, profile, done) => {
+      try {
+        const googleId = profile.id;
+        const email = profile.emails?.[0]?.value;
+        const avatar = profile.photos?.[0]?.value || "";
+        const username = profile.displayName || `googleuser_${googleId}`;
+
+        if (mongoose.connection.readyState === 1) {
+          let user = await User.findOne({ googleId });
+          if (!user && email) user = await User.findOne({ email });
+          if (!user) user = await User.create({ username, email, googleId, avatar });
+          else if (!user.googleId) {
+            user.googleId = googleId;
+            user.avatar = user.avatar || avatar;
+            await user.save();
+          }
+          return done(null, user);
+        }
+
+        let user = inMemoryStore.findUserByGoogleId?.(googleId);
+        if (!user && email) user = inMemoryStore.findUserByEmail?.(email);
+        if (!user) user = inMemoryStore.registerUser({ username, email, password: googleId, googleId, avatar });
+        return done(null, user);
+      } catch (error) {
+        return done(error);
+      }
+    }
+  ));
+}
 
 passport.serializeUser((user, done) => {
   done(null, user._id);

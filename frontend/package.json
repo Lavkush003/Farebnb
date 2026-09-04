@@ -13,6 +13,7 @@
     "axios": "^1.13.5",
     "date-fns": "^4.1.0",
     "firebase": "^12.9.0",
+    "leaflet": "^1.9.4",
     "mapbox-gl": "^3.18.1",
     "react": "^19.2.0",
     "react-date-range": "^2.0.1",

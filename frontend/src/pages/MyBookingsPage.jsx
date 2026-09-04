@@ -3,7 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { getUserBookings, cancelBooking } from "../api";
 import { useAuth } from "../context/AuthContext";
 import { format } from "date-fns";
-import { FaCalendarAlt, FaMapMarkerAlt, FaUsers, FaCheckCircle, FaTimesCircle, FaSuitcase } from "react-icons/fa";
+import { FaCalendarAlt, FaMapMarkerAlt, FaUsers, FaCheckCircle, FaTimesCircle, FaSuitcase, FaCreditCard, FaMoneyBillWave, FaMobileAlt } from "react-icons/fa";
 import "./MyBookings.css";
 
 export default function MyBookingsPage() {
@@ -128,6 +128,13 @@ export default function MyBookingsPage() {
                                                     {format(new Date(booking.startDate), "MMM d, yyyy")} –{" "}
                                                     {format(new Date(booking.endDate), "MMM d, yyyy")}
                                                 </span>
+                                            </div>
+                                        </div>
+                                        <div className="wh-trip-meta-item">
+                                            {booking.paymentMethod === "cash" ? <FaMoneyBillWave className="wh-meta-icon" /> : booking.paymentMethod === "online" ? <FaMobileAlt className="wh-meta-icon" /> : <FaCreditCard className="wh-meta-icon" />}
+                                            <div>
+                                                <label>Payment</label>
+                                                <span>{booking.paymentMethod === "card" ? "Debit / Credit Card" : booking.paymentMethod === "online" ? "Online Payment" : "Cash"}</span>
                                             </div>
                                         </div>
 

@@ -1,9 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import { API_BASE_URL } from "../api";
 import FlashMessage from "../components/FlashMessage";
-import { FcGoogle } from "react-icons/fc";
 import { FaArrowLeft } from "react-icons/fa";
 import { TbHomeSpark } from "react-icons/tb";
 import "./FormPage.css";
@@ -112,19 +110,6 @@ export default function SignupPage() {
                         {submitting ? "Creating your account..." : "Sign up"}
                     </button>
                 </form>
-
-                <div className="wh-auth-divider">
-                    <span>or</span>
-                </div>
-
-                <button
-                    type="button"
-                    className="wh-btn wh-btn-outline wh-btn-full wh-google-auth-btn"
-                    onClick={() => (window.location.href = `${API_BASE_URL}/users/google`)}
-                >
-                    <FcGoogle className="wh-google-icon" />
-                    Continue with Google
-                </button>
 
                 <div className="wh-auth-footer-text">
                     Already have an account? <Link to="/login">Log in</Link>

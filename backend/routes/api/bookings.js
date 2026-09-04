@@ -18,7 +18,11 @@ router.post(
     isLoggedInApi,
     wrapAsync(async (req, res) => {
         const { listingId } = req.params;
-        const { startDate, endDate, totalPrice, guests = 1 } = req.body;
+        const { startDate, endDate, totalPrice, guests = 1, paymentMethod } = req.body;
+        const validPaymentMethods = ["cash", "card", "online"];
+        if (!validPaymentMethods.includes(paymentMethod)) {
+            return res.status(400).json({ error: "Please select a valid payment method" });
+        }
 
         if (mongoose.connection.readyState === 1) {
             const newBooking = new Booking({
@@ -28,6 +32,8 @@ router.post(
                 endDate: new Date(endDate),
                 guests: Number(guests) || 1,
                 totalPrice: Number(totalPrice),
+                paymentMethod,
+                paymentStatus: "pending",
                 status: "confirmed",
             });
             const saved = await newBooking.save();
@@ -42,6 +48,7 @@ router.post(
             endDate,
             guests,
             totalPrice,
+            paymentMethod,
         });
         res.status(201).json(saved);
     })

@@ -10,9 +10,16 @@ const { data } = require("./init/data");
 
 const dbUrl = process.env.ATLASDB_URL || "mongodb://127.0.0.1:27017/farebnb";
 
-mongoose.connect(dbUrl)
-  .then(() => console.log("Connected to DB for seeding"))
-  .catch(err => console.error("DB connection error during seed:", err));
+const connectToDatabase = async () => {
+  try {
+    await mongoose.connect(dbUrl, { serverSelectionTimeoutMS: 5000 });
+    console.log("Connected to DB for seeding");
+  } catch (error) {
+    console.error("Could not connect to MongoDB. Seeding was not completed.");
+    console.error("Check your Atlas IP allowlist, credentials, cluster status, or local MongoDB service.");
+    throw error;
+  }
+};
 
 const initDB = async () => {
   // Ensure a default host user exists
@@ -65,7 +72,8 @@ const initDB = async () => {
   console.log(`Database Seeded Successfully with ${data.length} rich listings!`);
 };
 
-initDB()
+connectToDatabase()
+  .then(() => initDB())
   .then(() => {
     mongoose.connection.close();
   })

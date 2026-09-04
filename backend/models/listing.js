@@ -35,6 +35,10 @@ const listingSchema = new Schema({
     type: String,
     default: "Trending",
   },
+  isTrending: {
+    type: Boolean,
+    default: false,
+  },
   amenities: {
     type: [String],
     default: ["Wifi", "Kitchen", "Air conditioning", "Free parking"],

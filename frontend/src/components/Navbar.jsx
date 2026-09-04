@@ -161,7 +161,7 @@ export default function Navbar() {
                         ✨ AI Planner
                     </Link>
                     <Link to="/listings/new" className="wh-host-cta">
-                        Airbnb your home
+                        List your place
                     </Link>
 
                     <button

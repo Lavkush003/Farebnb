@@ -2,8 +2,8 @@ import { useState, useEffect, useRef } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { getAllListings } from "../api";
 import { useAuth } from "../context/AuthContext";
-import mapboxgl from "mapbox-gl";
-import "mapbox-gl/dist/mapbox-gl.css";
+import L from "leaflet";
+import "leaflet/dist/leaflet.css";
 import {
     FaFire,
     FaBed,
@@ -23,7 +23,10 @@ import {
     FaTimes,
     FaArrowRight,
     FaCompass,
-    FaCheckCircle
+    FaCheckCircle,
+    FaLeaf,
+    FaMoon,
+    FaUsers
 } from "react-icons/fa";
 import { FaCow, FaFortAwesome, FaMountainCity } from "react-icons/fa6";
 import "./Listings.css";
@@ -42,6 +45,12 @@ const CATEGORIES = [
     { label: "Farms", icon: <FaCow /> },
     { label: "Domes", icon: <FaIgloo /> },
     { label: "Boats", icon: <FaShip /> },
+];
+
+const STAY_BRIEFS = [
+    { label: "A slow weekend", detail: "Quiet rooms and green views", category: "Mountains", icon: <FaLeaf /> },
+    { label: "A city reset", detail: "Central stays, easy check-in", category: "Iconic Cities", icon: <FaCompass /> },
+    { label: "A night under stars", detail: "Open skies and room to breathe", category: "Camping", icon: <FaMoon /> },
 ];
 
 export default function ListingsPage() {
@@ -72,6 +81,7 @@ export default function ListingsPage() {
             params.search = searchQuery;
         }
 
+        setLoading(true);
         getAllListings(params)
             .then((res) => {
                 setListings(Array.isArray(res.data) ? res.data : []);
@@ -114,55 +124,45 @@ export default function ListingsPage() {
     useEffect(() => {
         if (viewMode !== "map" || !mapContainerRef.current) return;
 
-        const mapboxToken = import.meta.env.VITE_MAPBOX_TOKEN;
-        if (!mapboxToken) return;
-        mapboxgl.accessToken = mapboxToken;
-
         if (mapInstanceRef.current) {
             mapInstanceRef.current.remove();
         }
 
-        const defaultCenter =
-            listings.length > 0 && listings[0].geometry?.coordinates
-                ? listings[0].geometry.coordinates
-                : [78.9629, 20.5937]; // Center of India / Global
-
-        const map = new mapboxgl.Map({
-            container: mapContainerRef.current,
-            style: "mapbox://styles/mapbox/streets-v12",
-            center: defaultCenter,
-            zoom: listings.length > 0 ? 3 : 2,
+        const locatedListings = listings.filter((listing) => {
+            const coordinates = listing.geometry?.coordinates;
+            return Array.isArray(coordinates) && coordinates.length === 2 && coordinates.every(Number.isFinite);
         });
-
-        map.addControl(new mapboxgl.NavigationControl(), "top-right");
+        const defaultCenter = locatedListings[0]?.geometry.coordinates?.slice().reverse() || [20.5937, 78.9629];
+        const map = L.map(mapContainerRef.current, { zoomControl: true }).setView(defaultCenter, locatedListings.length > 0 ? 2 : 1);
+        L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+            attribution: "&copy; OpenStreetMap contributors",
+            maxZoom: 19,
+        }).addTo(map);
         mapInstanceRef.current = map;
 
         // Add markers
         markersRef.current.forEach((m) => m.remove());
         markersRef.current = [];
 
-        listings.forEach((listing) => {
-            if (!listing.geometry?.coordinates) return;
+        locatedListings.forEach((listing) => {
 
-            const el = document.createElement("div");
-            el.className = "wh-map-price-marker";
-            el.innerHTML = `<span>₹${(listing.price || 0).toLocaleString("en-IN")}</span>`;
+            const coordinates = listing.geometry.coordinates;
+            const marker = L.marker([coordinates[1], coordinates[0]], {
+                icon: L.divIcon({ className: "wh-leaflet-price-marker", html: `<span>₹${(listing.price || 0).toLocaleString("en-IN")}</span>`, iconAnchor: [32, 16] }),
+            }).addTo(map);
 
-            el.addEventListener("click", () => {
+            marker.on("click", () => {
                 setSelectedListing(listing);
-                map.flyTo({
-                    center: listing.geometry.coordinates,
-                    zoom: 11,
-                    essential: true,
-                });
+                map.flyTo([coordinates[1], coordinates[0]], 11, { animate: true });
             });
-
-            const marker = new mapboxgl.Marker(el)
-                .setLngLat(listing.geometry.coordinates)
-                .addTo(map);
 
             markersRef.current.push(marker);
         });
+
+        if (locatedListings.length > 1) {
+            const bounds = L.latLngBounds(locatedListings.map((listing) => [listing.geometry.coordinates[1], listing.geometry.coordinates[0]]));
+            map.fitBounds(bounds, { padding: [70, 70], maxZoom: 10, animate: false });
+        }
 
         return () => {
             if (mapInstanceRef.current) {
@@ -209,6 +209,34 @@ export default function ListingsPage() {
                         />
                         <div className="wh-hero-location-tag"><span>Featured escape</span><strong>Modern homes, anywhere</strong></div>
                     </div>
+                </section>
+            )}
+
+            {!searchQuery && !searchParams.get("category") && (
+                <section className="wh-stay-brief" aria-labelledby="stay-brief-title">
+                    <div className="wh-stay-brief-intro">
+                        <span className="wh-section-kicker">Your stay brief</span>
+                        <h2 id="stay-brief-title">What kind of room<br /><em>do you need?</em></h2>
+                        <p>Start with the feeling. We will take you to the places that match it.</p>
+                    </div>
+                    <div className="wh-stay-brief-options">
+                        {STAY_BRIEFS.map((brief) => (
+                            <button
+                                key={brief.label}
+                                type="button"
+                                className="wh-stay-brief-option"
+                                onClick={() => navigate(`/?category=${encodeURIComponent(brief.category)}`)}
+                            >
+                                <span className="wh-brief-icon">{brief.icon}</span>
+                                <span className="wh-brief-copy">
+                                    <strong>{brief.label}</strong>
+                                    <small>{brief.detail}</small>
+                                </span>
+                                <FaArrowRight className="wh-brief-arrow" />
+                            </button>
+                        ))}
+                    </div>
+                    <div className="wh-stay-brief-note"><FaUsers /> Flexible rooms for solo stays, couples, and groups</div>
                 </section>
             )}
 
@@ -329,7 +357,7 @@ export default function ListingsPage() {
                 /* Main View */
                 <>
                     {listings.length > 0 ? (
-                        (!activeCategory || activeCategory === "All") && !searchQuery ? (
+                        false ? (
                             /* Default Grouped View */
                             <div className="wh-grouped-layout">
                                 {Object.entries(

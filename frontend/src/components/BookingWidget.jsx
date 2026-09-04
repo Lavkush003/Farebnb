@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { createBooking, getListingBookedDates } from "../api";
 import { differenceInDays, format, addDays, startOfDay } from "date-fns";
-import { FaStar, FaChevronDown, FaUserFriends, FaCheckCircle } from "react-icons/fa";
+import { FaStar, FaChevronDown, FaUserFriends, FaCheckCircle, FaCreditCard, FaMoneyBillWave, FaMobileAlt } from "react-icons/fa";
 import "react-date-range/dist/styles.css";
 import "react-date-range/dist/theme/default.css";
 import "./BookingWidget.css";
@@ -15,6 +15,9 @@ export default function BookingWidget({ listing }) {
     const [submitting, setSubmitting] = useState(false);
     const [error, setError] = useState(null);
     const [bookingSuccess, setBookingSuccess] = useState(false);
+    const [showPayment, setShowPayment] = useState(false);
+    const [paymentMethod, setPaymentMethod] = useState("");
+    const [paymentDetails, setPaymentDetails] = useState({ cardNumber: "", expiry: "", cvv: "", upiId: "" });
 
     const [showDatePicker, setShowDatePicker] = useState(false);
     const [showGuestPicker, setShowGuestPicker] = useState(false);
@@ -69,9 +72,33 @@ export default function BookingWidget({ listing }) {
 
     const maxAllowedGuests = listing?.maxGuests || 4;
 
-    const handleReserve = async () => {
+    const handleReserve = () => {
         if (!user) {
             navigate("/login");
+            return;
+        }
+
+        setError(null);
+        setShowPayment(true);
+    };
+
+    const handlePaymentDetailChange = (event) => {
+        const { name, value } = event.target;
+        setPaymentDetails((current) => ({ ...current, [name]: value }));
+    };
+
+    const handleConfirmReservation = async (event) => {
+        event.preventDefault();
+        if (!paymentMethod) {
+            setError("Please select a payment method");
+            return;
+        }
+        if (paymentMethod === "card" && (!paymentDetails.cardNumber || !paymentDetails.expiry || !paymentDetails.cvv)) {
+            setError("Please enter your card details");
+            return;
+        }
+        if (paymentMethod === "online" && !paymentDetails.upiId) {
+            setError("Please enter your UPI ID");
             return;
         }
 
@@ -84,6 +111,7 @@ export default function BookingWidget({ listing }) {
                 endDate: endDate.toISOString(),
                 guests,
                 totalPrice,
+                paymentMethod,
             });
             setBookingSuccess(true);
             setTimeout(() => {
@@ -219,6 +247,52 @@ export default function BookingWidget({ listing }) {
                 <div className="wh-booking-success-alert">
                     <FaCheckCircle /> Reservation confirmed! Redirecting to your trips...
                 </div>
+            ) : showPayment ? (
+                <form className="wh-payment-panel" onSubmit={handleConfirmReservation}>
+                    <div className="wh-payment-heading">
+                        <div>
+                            <span className="wh-box-label">PAYMENT</span>
+                            <h3>Choose how to pay</h3>
+                        </div>
+                        <strong>₹{totalPrice.toLocaleString("en-IN")}</strong>
+                    </div>
+                    <div className="wh-payment-options">
+                        <label className={`wh-payment-option ${paymentMethod === "cash" ? "selected" : ""}`}>
+                            <input type="radio" name="paymentMethod" value="cash" checked={paymentMethod === "cash"} onChange={(event) => setPaymentMethod(event.target.value)} />
+                            <FaMoneyBillWave /><span>Cash</span>
+                        </label>
+                        <label className={`wh-payment-option ${paymentMethod === "card" ? "selected" : ""}`}>
+                            <input type="radio" name="paymentMethod" value="card" checked={paymentMethod === "card"} onChange={(event) => setPaymentMethod(event.target.value)} />
+                            <FaCreditCard /><span>Debit / Credit Card</span>
+                        </label>
+                        <label className={`wh-payment-option ${paymentMethod === "online" ? "selected" : ""}`}>
+                            <input type="radio" name="paymentMethod" value="online" checked={paymentMethod === "online"} onChange={(event) => setPaymentMethod(event.target.value)} />
+                            <FaMobileAlt /><span>Online Payment</span>
+                        </label>
+                    </div>
+                    {paymentMethod === "card" && (
+                        <div className="wh-payment-fields">
+                            <input name="cardNumber" placeholder="Card number" inputMode="numeric" value={paymentDetails.cardNumber} onChange={handlePaymentDetailChange} />
+                            <div className="wh-payment-field-row">
+                                <input name="expiry" placeholder="MM/YY" value={paymentDetails.expiry} onChange={handlePaymentDetailChange} />
+                                <input name="cvv" placeholder="CVV" inputMode="numeric" value={paymentDetails.cvv} onChange={handlePaymentDetailChange} />
+                            </div>
+                            <small>Demo checkout: card details are not stored or charged.</small>
+                        </div>
+                    )}
+                    {paymentMethod === "online" && (
+                        <div className="wh-payment-fields">
+                            <input name="upiId" placeholder="Enter UPI ID" value={paymentDetails.upiId} onChange={handlePaymentDetailChange} />
+                            <small>Demo checkout: no real payment is processed.</small>
+                        </div>
+                    )}
+                    <div className="wh-payment-actions">
+                        <button type="button" className="wh-btn wh-btn-outline" onClick={() => setShowPayment(false)}>Back</button>
+                        <button type="submit" className="wh-btn wh-btn-primary wh-booking-reserve-btn" disabled={submitting}>
+                            {submitting ? "Confirming..." : "Confirm Reservation"}
+                        </button>
+                    </div>
+                </form>
             ) : (
                 <button
                     type="button"

@@ -222,6 +222,88 @@
     margin-bottom: 0.75rem;
 }
 
+.wh-payment-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 0.9rem;
+    margin-top: 0.5rem;
+}
+
+.wh-payment-heading {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.wh-payment-heading h3 {
+    margin-top: 0.2rem;
+    font-size: 1.1rem;
+}
+
+.wh-payment-heading strong {
+    font-size: 1.05rem;
+}
+
+.wh-payment-options {
+    display: grid;
+    gap: 0.5rem;
+}
+
+.wh-payment-option {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    border: 1px solid var(--gray-light);
+    border-radius: var(--radius-md);
+    padding: 0.75rem;
+    cursor: pointer;
+    font-size: 0.88rem;
+    font-weight: 600;
+}
+
+.wh-payment-option.selected {
+    border-color: var(--primary);
+    background: #fff5f7;
+}
+
+.wh-payment-option input {
+    accent-color: var(--primary);
+}
+
+.wh-payment-fields {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.wh-payment-fields input {
+    width: 100%;
+    border: 1px solid var(--gray-light);
+    border-radius: var(--radius-sm);
+    padding: 0.7rem;
+    font: inherit;
+}
+
+.wh-payment-field-row,
+.wh-payment-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.wh-payment-field-row input,
+.wh-payment-actions > * {
+    flex: 1;
+}
+
+.wh-payment-fields small {
+    color: var(--gray-medium);
+    font-size: 0.72rem;
+}
+
+.wh-payment-actions .wh-booking-reserve-btn {
+    margin-top: 0;
+}
+
 /* Price Breakdown */
 .wh-price-breakdown {
     display: flex;

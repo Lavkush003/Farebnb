@@ -1,9 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import { API_BASE_URL } from "../api";
 import FlashMessage from "../components/FlashMessage";
-import { FcGoogle } from "react-icons/fc";
 import { FaBolt, FaHome, FaArrowLeft } from "react-icons/fa";
 import { TbHomeSpark } from "react-icons/tb";
 import "./FormPage.css";
@@ -55,7 +53,19 @@ export default function LoginPage() {
     };
 
     return (
-        <div className="wh-form-page-wrapper">
+        <div className="wh-form-page-wrapper wh-login-page">
+            <aside className="wh-login-visual">
+                <img
+                    src="https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&w=900&q=85"
+                    alt="Sunlit room prepared for a stay"
+                />
+                <div className="wh-login-visual-overlay">
+                    <span className="wh-login-visual-kicker">A better way to arrive</span>
+                    <h1>Find a room<br /><em>that feels like yours.</em></h1>
+                    <p>Keep your favorite stays close and your next check-in simple.</p>
+                    <span className="wh-login-visual-mark">FAREBNB / FIELD NOTES</span>
+                </div>
+            </aside>
             <div className="wh-auth-card">
                 <Link to="/" className="wh-form-back-btn">
                     <FaArrowLeft /> Back to home
@@ -140,19 +150,6 @@ export default function LoginPage() {
                         {submitting ? "Signing in..." : "Log in"}
                     </button>
                 </form>
-
-                <div className="wh-auth-divider">
-                    <span>or</span>
-                </div>
-
-                <button
-                    type="button"
-                    className="wh-btn wh-btn-outline wh-btn-full wh-google-auth-btn"
-                    onClick={() => (window.location.href = `${API_BASE_URL}/users/google`)}
-                >
-                    <FcGoogle className="wh-google-icon" />
-                    Continue with Google
-                </button>
 
                 <div className="wh-auth-footer-text">
                     Don't have an account? <Link to="/signup">Sign up</Link>
